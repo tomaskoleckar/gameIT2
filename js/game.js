@@ -3,11 +3,20 @@ const ctx = canvas.getContext('2d');
 let test;
 function mouseDetection() {
     canvas.addEventListener("mousemove", function (e) {
-        if (e.y < 675) {
+        if (e.y < 675&&e.y>134) {
             gun.y = e.y;
             gun.y -= 134;
         }
     })
+}
+function updateScore(){
+    let score = document.getElementById("score");
+    score.innerHTML ="Score : "+ game.score + "";
+    let health = document.getElementById("health");
+    health.innerHTML="Health : " + game.health + "";
+    if(game.health == 0){
+        location.reload();
+    }
 }
 function addBullet() {
     canvas.addEventListener("click", function () {
@@ -15,7 +24,6 @@ function addBullet() {
     })
 }
 function addEnemy(difficulty) {
-    console.log(difficulty);
     switch (difficulty) {
         case 1: setInterval(function () {
             game.spawnEnemies();
@@ -125,13 +133,17 @@ class Game {
         this.enemies = [];
         this.speed = 5;
         this.difficulty = 2;
+        this.score = 0;
+        this.coins = 0; 
+        this.health = 10;
+        this.hScore = 0;
     };
     init() {
         gun.init();
     };
     draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        this.bullets.forEach(function (bullets, index, arr) {
+        this.bullets.forEach(function (bullets, index, arr,) {
             bullets.move();
             bullets.draw();
             /* Jestliže koule spadne pod dolní okraj... */
@@ -139,34 +151,40 @@ class Game {
                 /*...bude z pole odstraněna */
                 arr.splice(index, 1);
             }
-            /*if(detectCollisionCircleRect(bullets,enemies)){
-                arr.splice(index,1);
-
-            }*/
+            
         });
-        this.enemies.forEach(function (enemies, index, arr) {
+        this.enemies.forEach(function (enemies,index,arr) {
             enemies.move();
             enemies.draw();
             /* Jestliže koule spadne pod dolní okraj... */
-            if (enemies.x < 0) {
-                /*...bude z pole odstraněna */
+            if (enemies.x < (canvas.width / 11)) {
+                game.health--;
                 arr.splice(index, 1);
             }
-            /*if(detectCollisionCircleRect(bullets,enemies)){
-                arr.splice(index,1);
-
-            }*/
+            game.bullets.forEach(function(bullets,indexb,arrb){
+                if(detectCollisionCircleRect(bullets,enemies)){
+                    arr.splice(index, 1);
+                    arrb.splice(indexb, 1);
+                    game.score++;
+                    if(Math.round(Math.random()*5+1)==5){
+                        Game.coins++;
+                    }
+                }
+            })
         });
         gun.draw();
         gameboard.draw();
     };
     spawnEnemies() {
-        let yHelp = Math.round(Math.random() * 5) + 1;
-        let y = canvas.height / yHelp;
+        let yHelp = Math.round(Math.random() * 6-0.49);
+        if(yHelp>6){
+            yhelp = 6;
+        }
+        
+        let y = canvas.height / 6 * yHelp;
         let x = canvas.width;
         let speed = 3;
         this.enemies.push(new Enemies(x, y, speed));
-        console.log(game.enemies);
     }
     addBullets() {
         let y = gun.y + 10;
@@ -179,6 +197,7 @@ class Game {
 function animate() {
     game.draw();
     requestAnimationFrame(animate);
+    updateScore();
 }
 let game = new Game();
 addBullet();
@@ -186,4 +205,5 @@ addEnemy(game.difficulty);
 mouseDetection();
 game.init();
 animate();
+
 

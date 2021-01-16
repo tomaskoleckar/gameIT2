@@ -4,3 +4,15 @@
 footer{
     margin-top: 300px;
 }
+#score{
+    color: red;
+    text-align: left;
+}
+#health{
+    color: blue;
+    text-align: left;
+}
+#hScore{
+    color: green;
+    text-align: left;
+}
