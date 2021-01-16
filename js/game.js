@@ -15,8 +15,7 @@ function togglePause()
 }
 window.addEventListener('keydown', function (e) {
     pauseGame(e);
-    });
-
+    });  
 function pauseGame(e){
     let key = e.key;
     if (key === "Escape"){
@@ -36,7 +35,7 @@ function updateScore(){
     score.innerHTML ="Score : "+ game.score + "";
     let health = document.getElementById("health");
     health.innerHTML="Health : " + game.health + "";
-    if(game.health == 0){
+    if(game.health <= 0){
         location.reload();
     }
 }
@@ -48,19 +47,27 @@ function addBullet() {
 function addEnemy(difficulty) {
     switch (difficulty) {
         case 1: setInterval(function () {
-            game.spawnEnemies();
+            if(paused==false){
+                game.spawnEnemies();
+                }
         }, 2000);
             break;
         case 2: setInterval(function () {
+            if(paused==false){
             game.spawnEnemies();
+            }
         }, 1000);
             break;
         case 3: setInterval(function () {
-            game.spawnEnemies();
+            if(paused==false){
+                game.spawnEnemies();
+                }
         }, 500);
             break;
         default: setInterval(function () {
-            game.spawnEnemies();
+            if(paused==false){
+                game.spawnEnemies();
+                }
         }, 1000);
             break;
     }
@@ -140,6 +147,7 @@ class Bullets {
         this.y = y;
         this.radius = radius;
         this.speed = speed;
+        this.damage = 1;
         this.color = Bullets.FILL_COLOR;
     }
     move() {
@@ -191,10 +199,12 @@ class Game {
                     enemies.health--;
                     if(enemies.health==0){
                         arr.splice(index, 1);
-                        game.score+= game.level;
-                        if(game.score % 100){
+                        game.score++;
+                        if(game.score % 100 == 0){
                             game.level++;
                             game.health = 10;
+                            game.enemies = [];
+                            game.bullets = [];
                             paused = true;
                         }
                     }
