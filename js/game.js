@@ -1,6 +1,28 @@
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
-let test;
+let paused = false;
+function togglePause()
+{
+    if (!paused)
+    {
+        paused = true;
+    } 
+    else if (paused)
+    {
+       paused= false;
+    }
+    animate();
+}
+window.addEventListener('keydown', function (e) {
+    pauseGame(e);
+    });
+
+function pauseGame(e){
+    let key = e.key;
+    if (key === "Escape"){
+        togglePause();
+    }
+}
 function mouseDetection() {
     canvas.addEventListener("mousemove", function (e) {
         if (e.y < 675&&e.y>134) {
@@ -84,10 +106,16 @@ let gun = {
     },
 
 };
+class Boss{
+    constructor(x,y,speed){
+
+    }
+}
 class Enemies {
     constructor(x, y, speed) {
         this.x = x;
         this.y = y;
+        this.health = 1*game.level;
         this.width = 50;
         this.height = 80;
         this.speed = speed;
@@ -136,19 +164,17 @@ class Game {
         this.score = 0;
         this.coins = 0; 
         this.health = 10;
-        this.hScore = 0;
+        this.level = 1;
     };
     init() {
         gun.init();
     };
-    draw() {
+    play() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         this.bullets.forEach(function (bullets, index, arr,) {
             bullets.move();
             bullets.draw();
-            /* Jestliže koule spadne pod dolní okraj... */
             if (bullets.x + bullets.radius > canvas.width) {
-                /*...bude z pole odstraněna */
                 arr.splice(index, 1);
             }
             
@@ -156,18 +182,25 @@ class Game {
         this.enemies.forEach(function (enemies,index,arr) {
             enemies.move();
             enemies.draw();
-            /* Jestliže koule spadne pod dolní okraj... */
             if (enemies.x < (canvas.width / 11)) {
                 game.health--;
                 arr.splice(index, 1);
             }
             game.bullets.forEach(function(bullets,indexb,arrb){
                 if(detectCollisionCircleRect(bullets,enemies)){
-                    arr.splice(index, 1);
+                    enemies.health--;
+                    if(enemies.health==0){
+                        arr.splice(index, 1);
+                        game.score+= game.level;
+                        if(game.score % 100){
+                            game.level++;
+                            game.health = 10;
+                            paused = true;
+                        }
+                    }
                     arrb.splice(indexb, 1);
-                    game.score++;
                     if(Math.round(Math.random()*5+1)==5){
-                        Game.coins++;
+                        Game.coins+=game.difficulty*game.level;
                     }
                 }
             })
@@ -181,10 +214,10 @@ class Game {
             yhelp = 6;
         }
         
-        let y = canvas.height / 6 * yHelp;
+        let y = canvas.height / 6 * yHelp+22;
         let x = canvas.width;
         let speed = 3;
-        this.enemies.push(new Enemies(x, y, speed));
+        this.enemies.push(new Enemies(x, y, speed*game.difficulty));
     }
     addBullets() {
         let y = gun.y + 10;
@@ -195,9 +228,13 @@ class Game {
     };
 }
 function animate() {
-    game.draw();
+    if(!paused)
+{ 
+    game.play();
     requestAnimationFrame(animate);
     updateScore();
+}
+
 }
 let game = new Game();
 addBullet();
