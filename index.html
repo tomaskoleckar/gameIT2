@@ -11,21 +11,36 @@
   </head>
   <body>
     <header class="jumbotron-fluid bg-info p-3">
-        <h1 class="text-center display-3 text-white">Game</h1>
+        <h1 class="text-center display-3 text-white">Zombie attack</h1>
     </header>  
     <main class="container-fluid text-center mt-2">
-        <canvas id="gameboard" width="1520" height="600" class="border"></canvas>
+      <div class="row">
+        <div class="col-md-4">
+          <h1 id="score"></h1>
+        </div>
+        <div class="col-md-4">
+          <h1 id="health"></h1>
+        </div>
+        <div class="col-md-4">
+          <h1 id="coins"></h1>
+        </div>
+      </div>
+        
+      <canvas id="gameboard" width="1520" height="600" class="border"></canvas>
+      <div class="buttons">
         <div class="row">
-          <div class="col-md-4">
-            <h1 id="score"></h1>
+          <div class="col-md-8">
+            <button id="upgbtn" type="button"></button>
+            <button id="maxhpbtn" type="button">+MaxHp</button>
+            <button id="trtbtn" type="button">+Turret</button>
           </div>
           <div class="col-md-4">
-            <h1 id="health"></h1>
-          </div>
-          <div class="col-md-4">
-            <h1 id="coins"></h1>
+            <button id="menubtn" type="menu">Menu</button>
           </div>
         </div>
+
+      </div>
+
 
     </main>
     <footer class="bg-light p-3 text-center">

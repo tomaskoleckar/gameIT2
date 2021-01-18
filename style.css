@@ -6,13 +6,16 @@ footer{
 }
 #score{
     color: red;
-    text-align: left;
+    text-align: center;
 }
 #health{
     color: blue;
-    text-align: left;
+    text-align: center;
 }
-#hScore{
-    color: green;
-    text-align: left;
+#coins{
+    color: yellow;
+    text-align: center;
+}
+.buttons{
+    font-size: 35px;
 }
