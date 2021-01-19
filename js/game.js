@@ -25,20 +25,73 @@ function pauseGame(e){
 }
 function buttons(){
     let upgradeCost = 10;
+    let maxHpCost = 10;
+    let maxHpBought = 0;
+    let turretCost = 100;
+    let turretBought = 0;
     let upgrade = document.getElementById("upgbtn");
     let maxHp = document.getElementById("maxhpbtn");
     let turret = document.getElementById("trtbtn");
     let menu = document.getElementById("menubtn");
     upgrade.innerHTML = "+Damage (" + upgradeCost + ")";
+    maxHp.innerHTML = "+MaxHp (" + maxHpCost + ")";
     upgrade.addEventListener("click", function(){
         if(game.coins>=upgradeCost){
             game.coins -= upgradeCost;
-            upgradeCost += 1+Math.round(upgradesBought/10);
             upgradesBought++;
-            upgrade.innerHTML = "Upgrade (" + upgradeCost + ")";
+            upgradeCost += (1+Math.round(upgradesBought/10))*upgradesBought;
+            upgrade.innerHTML = "+Damage (" + upgradeCost + ")";
         }
-        else{
-
+        updateScore();
+    });
+    turret.addEventListener("click", function(){
+            if(game.coins >= turretCost){
+            canvas.addEventListener("click",function(e){
+                let x = canvas.width/10;
+                let y;
+                let shootingSpeed = 1;
+                console.log(e.y);
+                y = Math.floor((e.y+9)/100);
+                switch(y){
+                    case 2:
+                        y=0;
+                        break;
+                    case 3:
+                        y=100;
+                        break;
+                    case 4:
+                        y=200;
+                        break;
+                    case 5:
+                        y=300;
+                        break;
+                    case 6:
+                        y=400;
+                        break;
+                    case 7:
+                        y=500;
+                        break;            
+                }
+                if(turretBought<6){
+                game.turret.push(new Turret(x, y,shootingSpeed));
+                turretBought++;
+                }
+                return;
+            })
+            }
+            return;
+    })
+    maxHp.addEventListener("click", function(){
+        if(game.coins>=maxHpCost){
+            game.coins -= maxHpCost;
+            maxHpBought++;
+            maxHpCost += (1 + Math.round(maxHpBought/10))*maxHpBought;
+            game.health += Math.round(game.maxHealth/10);
+            if(game.health>game.maxHealth){
+                game.health = game.maxHealth;
+            }
+            game.maxHealth += maxHpBought + Math.round(maxHpBought/10);
+            maxHp.innerHTML = "+MaxHp (" + maxHpCost + ")";
         }
         updateScore();
     });
@@ -62,10 +115,19 @@ function updateScore(){
     if(game.health <= 0){
         game = new Game();
     }
+    if(upgradesBought == 10){
+        gun.sprite.src = "img/ak47.png";
+        gun.width += 50;
+        gun.height += 20;
+        gun.x = 0;
+        upgradesBought++;
+    }
 }
 function addBullet() {
     canvas.addEventListener("click", function () {
-        game.addBullets();
+        game.addBullets(1);
+        console.log(game.bullets);
+        console.log(game.turret);
     })
 }
 function addEnemy(difficulty) {
@@ -137,11 +199,32 @@ let gun = {
     },
 
 };
-class Boss{
-    constructor(x,y,speed){
+class Turret{
+    constructor(x,y,shootingSpeed){
         this.x = x;
         this.y = y;
-        this.health = 50*game.level;
+        this.health = 1;
+        this.shootingSpeed = shootingSpeed;
+        this.width = 80;
+        this.height = 80;
+        this.img = new Image();
+        this.img.src = 'img/turret.png';
+    }
+    init() {
+        this.img.src = 'img/turret.png';
+    };
+    shoot(){
+        game.addBullets(0);
+    }
+    draw() {
+        ctx.drawImage(this.img, this.x,this.y, this.width, this.height);
+    }
+}
+class Boss{
+    constructor(x,y,speed,health){
+        this.x = x;
+        this.y = y;
+        this.health = health;
         this.speed = speed;
         this.width = 160;
         this.height = 160;
@@ -163,7 +246,7 @@ class Enemies {
     constructor(x, y, speed) {
         this.x = x;
         this.y = y;
-        this.health = 1*game.level;
+        this.health = game.level**2;
         this.width = 50;
         this.height = 80;
         this.speed = speed;
@@ -209,10 +292,11 @@ class Game {
         this.bullets = [];
         this.enemies = [];
         this.boss = [];
+        this.turret = [];
         this.speed = 5;
         this.difficulty = 2;
         this.score = 0;
-        this.coins = 0; 
+        this.coins = 100; 
         this.health = 10;
         this.level = 1;
         this.maxHealth = 10;
@@ -233,11 +317,11 @@ class Game {
             enemies.move();
             enemies.draw();
             if (enemies.x < (canvas.width / 11)) {
-                game.health-=game.level;
+                game.health-=Math.round(game.level/2);
                 arr.splice(index, 1);
             }
             game.bullets.forEach(function(bullets,indexb,arrb){
-                let odds = Math.round(Math.random()*2+1);
+                let odds = Math.ceil(Math.random()*3);
                 if(detectCollisionCircleRect(bullets,enemies)){
                     enemies.health-=bullets.damage;
                     if(enemies.health<=0){
@@ -269,7 +353,7 @@ class Game {
                     if(boss.health<=0){
                         arr.splice(index, 1);
                         game.coins += Math.round(Math.random()*9+1);
-                        game.health = 10;
+                        game.health = game.maxHealth;
                         game.level++;
                         game.enemies = [];
                         paused = true;
@@ -278,6 +362,19 @@ class Game {
                 }
             })
 
+        })
+        this.turret.forEach(function(turret,index,arr){
+            let i = 0;
+            turret.draw();
+            if(i==0){
+                if(paused == false){
+                    setInterval(function(){
+                        turret.shoot();
+                    } ,1000);
+
+                }
+                i++;
+            }
         })
         gun.draw();
         gameboard.draw();
@@ -292,13 +389,19 @@ class Game {
         }
         this.enemies.push(new Enemies(x, y, speed*game.difficulty));
     }
-    addBullets() {
+    addBullets(e) {
         let y = gun.y + 10;
+        let x = gun.x;
         let radius = 5;
         let speed = 5;
         let damage = 1;
         damage += upgradesBought + Math.round(upgradesBought/10);
-        this.bullets.push(new Bullets(gun.x, y, radius, speed,damage));
+        if(e == 0){
+            x = this.turret.x;
+            y = this.turret.y;
+            damage = Math.round(damage/2);
+        }
+        this.bullets.push(new Bullets(x, y, radius, speed,damage));
 
     };
     spawnBoss(){
@@ -306,10 +409,12 @@ class Game {
         let y = canvas.height / 3 * yHelp+22;
         let x = canvas.width;
         let speed = 1;
+        let health = 50*game.level*Math.round(game.level/2);
+
         if(yHelp>3){
             yhelp = 3;
         }
-        this.boss.push(new Boss(x, y, speed*game.difficulty));
+        this.boss.push(new Boss(x, y, speed*game.difficulty,health));
     }
 }
 function animate() {
