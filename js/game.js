@@ -27,10 +27,12 @@ function buttons() {
     let turretCost = 100;
     let buttonActive = false;
     let y;
+    let level = document.getElementById("level");
     let upgrade = document.getElementById("upgbtn");
     let maxHp = document.getElementById("maxhpbtn");
     let turret = document.getElementById("trtbtn");
     let menu = document.getElementById("menubtn");
+    level.innerHTML = "Level : " + game.level + "";
     upgrade.innerHTML = "+Damage (" + upgradeCost + ")";
     maxHp.innerHTML = "+MaxHp (" + maxHpCost + ")";
     turret.innerHTML = "+Turret (" + turretCost + ")";
@@ -120,6 +122,7 @@ function updateScore() {
     score.innerHTML = "Score : " + game.score + "";
     health.innerHTML = "Health : " + game.health + "";
     coins.innerHTML = "Coins : " + game.coins + "";
+    level.innerHTML = "Level : " + game.level + "";
 
     if (game.health <= 0) {
         game.turret = [];
