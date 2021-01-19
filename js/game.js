@@ -25,7 +25,6 @@ function buttons() {
     let maxHpCost = 10;
     let maxHpBought = 0;
     let turretCost = 100;
-    let turretBought = 0;
     let buttonActive = false;
     let y;
     let upgrade = document.getElementById("upgbtn");
@@ -85,7 +84,6 @@ function buttons() {
                     turretCost += 100;
                     game.turret.push(new Turret(x, y, shootingSpeed));
                     turretShoot(shootingSpeed, y);
-                    turretBought++;
                     turret.innerHTML = "+Turret (" + turretCost + ")";
 
                 }
@@ -126,6 +124,7 @@ function updateScore() {
     if (game.health <= 0) {
         game.turret = [];
         game = new Game();
+        paused = true;
     }
     if (upgradesBought == 10) {
         gun.sprite.src = "img/ak47.png";
@@ -145,7 +144,6 @@ function turretShoot(shootingSpeed, y) {
     setInterval(function () {
         if (paused == false) {
             game.addBullets(0, y);
-            console.log(game.turret.x);
         }
     }, 1000 / shootingSpeed);
 }
@@ -230,9 +228,6 @@ class Turret {
         this.img = new Image();
         this.img.src = 'img/turret.png';
     }
-    init() {
-        this.img.src = 'img/turret.png';
-    };
     draw() {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
     }
@@ -250,9 +245,6 @@ class Boss {
     }
     move() {
         this.x -= this.speed;
-    };
-    init() {
-        this.img.src = 'img/boss.svg';
     };
     draw() {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
@@ -272,9 +264,6 @@ class Enemies {
     };
     move() {
         this.x -= this.speed;
-    };
-    init() {
-        this.img.src = 'img/enemy.svg';
     };
     draw() {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
@@ -374,6 +363,7 @@ class Game {
                         game.health = game.maxHealth;
                         game.level++;
                         game.enemies = [];
+                        game.bullets = [];
                         paused = true;
                     }
                     arrb.splice(indexb, 1);
@@ -383,15 +373,6 @@ class Game {
         })
         this.turret.forEach(function (turret, index, arr) {
             turret.draw();
-            game.enemies.forEach(function (enemies, indexb, arrb){
-                if (detectCollisionRectRect(turret, enemies)) {
-                    enemies.health -= 10*game.level;
-                    if (enemies.health <= 0) {
-                        arrb.splice(indexb, 1);
-                    }
-                    arr.splice(index, 1);
-                }
-            })
         })
         gun.draw();
         gameboard.draw();
